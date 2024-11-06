@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { usersCollection } from '../models/index.js'
 
 export default () => { 
     let router = Router()
@@ -6,15 +7,22 @@ export default () => {
     //Creating a new user
     //We are going to receive data about user (In the body of the request)
     // /api/users
-    router.post('/', (req, res) => {
-        const data = req.body
-        console.log(req.params)
-        // Operations to DB
 
-        res.send({
-            message: "Success",
-            user: data
-        })
+    //  /api/users
+    router.post('/', async (req, res) => {
+        const body = req.body
+        console.log(body)
+        // !body.username || !body.age || !body.email
+        if (body.username && body.age && body.email) {
+            const user = await usersCollection.create(body)
+            if (user) {
+                res.send({ success: true, message: "User created successfully", user: user })
+            } else {
+                res.send({ success: false, message: "Try again" })
+            }
+        } else {
+            res.send({ success: false, message: 'Please send user information' })
+        }
     })
 
 
