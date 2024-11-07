@@ -29,23 +29,13 @@ export default () => {
 
 
     //Update a user
-    router.put('/', async (req, res) => {
+    router.put('/:id', async (req, res) => {
+        const { id } = req.params
         const body = req.body
         // const {username, age, email} = req.body
 
         // (filter, data)
-        console.log(body)
-        const result = await usersCollection.updateMany(
-            { _id: new ObjectId('672bc6cc1d60f8c878ef48e0') },
-            { $set: { username: body.username, age: body.age } }
-        )
-        res.send({ success: true, result })
-
-    })
-
-    router.put('/update_many', async (req, res) => {
-        const body = req.body
-        const newUpdate = await usersCollection.updateMany({ username: { $regex: body.username } }, { age: body.age })
+        const newUpdate = await usersCollection.updateOne({ _id: id }, { username: body.username, email: body.email, age: body.age })
         if (newUpdate) {
             res.send({ success: true, user: newUpdate })
         } else {
