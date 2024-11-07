@@ -5,8 +5,6 @@ import CONFIG from './config.json' with {type:"json"}
 import mongoose from 'mongoose'
 
 const app = express()
-const PORT = 8000
-
 
 mongoose
     .connect(CONFIG.mongo_url)
@@ -16,7 +14,7 @@ mongoose
 
         app.use('/api', api())
 
-        app.listen(PORT, () => {
-            console.log(`Server listening on port ${PORT}`);
+        app.listen(CONFIG.port, () => {
+            console.log(`Server listening on port ${CONFIG.port}`);
         });
     })

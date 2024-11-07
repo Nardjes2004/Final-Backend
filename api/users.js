@@ -1,7 +1,9 @@
 import { Router } from 'express'
 import { usersCollection } from '../models/index.js'
+import mongoose from 'mongoose';
+const ObjectId = mongoose.Types.ObjectId;
 
-export default () => { 
+export default () => {
     let router = Router()
 
     //Creating a new user
@@ -27,16 +29,28 @@ export default () => {
 
 
     //Update a user
-    router.put('/:id', (req, res) => {
-        const { id } = req.params
-        console.log(id)
-        //Let's look for the user with id
-        //If it exists we update it
+    router.put('/', async (req, res) => {
+        const body = req.body
+        // const {username, age, email} = req.body
 
-        res.send({
-            success: true,
-            message: `User with id = ${id} has been updated`
-        })
+        // (filter, data)
+        console.log(body)
+        const result = await usersCollection.updateMany(
+            { _id: new ObjectId('672bc6cc1d60f8c878ef48e0') },
+            { $set: { username: body.username, age: body.age } }
+        )
+        res.send({ success: true, result })
+
+    })
+
+    router.put('/update_many', async (req, res) => {
+        const body = req.body
+        const newUpdate = await usersCollection.updateMany({ username: { $regex: body.username } }, { age: body.age })
+        if (newUpdate) {
+            res.send({ success: true, user: newUpdate })
+        } else {
+            res.send({ success: false, message: 'Server Error' })
+        }
     })
 
 
