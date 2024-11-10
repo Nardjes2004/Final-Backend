@@ -35,7 +35,18 @@ export default () => {
         // const {username, age, email} = req.body
 
         // (filter, data)
-        const newUpdate = await usersCollection.updateOne({ _id: id }, { username: body.username, email: body.email, age: body.age })
+        const newUpdate = await usersCollection.findOneAndUpdate({ _id: id }, { username: body.username, email: body.email, age: body.age }, { returnDocument: 'after' })
+        if (newUpdate) {
+            res.send({ success: true, user: newUpdate })
+        } else {
+            res.send({ success: false, message: 'Server Error' })
+        }
+    })
+
+    router.put('/update_many/:username', async (req, res) => {
+        const body = req.body
+        const { username } = req.params
+        const newUpdate = await usersCollection.updateMany({ username: { $regex: username } }, body)
         if (newUpdate) {
             res.send({ success: true, user: newUpdate })
         } else {
