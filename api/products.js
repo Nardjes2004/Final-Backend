@@ -1,13 +1,65 @@
 import { Router } from "express";
-import { productsCollection } from "../models/index.js";
+import { ordersCollections, productsCollection } from "../models/index.js";
+import moment from "moment";
 
 export default () => {
 
     let router = Router()
 
+
+    router.post("/filter-dynamically", async (req, res) => {
+        const options = {}
+        let projection = null
+        let filter = {}
+
+        // Building the filter 
+        if (req.body.name) {
+            filter.name = { $regex: req.body.name }
+        }
+        if (req.body.category) {
+            filter.category = { $regex: req.body.category }
+        }
+        if (req.body.price) {
+            filter.price = { $gt: req.body.price }
+        }
+        if (req.body.stock) {
+            filter.stock = { $gt: req.body.stock }
+        }
+
+        // Building the projection
+        if (req.body.project) {
+            projection = req.body.project
+        }
+
+        // Building the options
+        if (req.query.skip) {
+            options.skip = req.query.skip
+        }
+        if (req.query.limit) {
+            options.limit = req.query.limit
+        }
+        console.log(filter)
+        const list = await productsCollection.find(filter, projection, options)
+
+        if (list) {
+            res.send({
+                success: true,
+                count: list.length,
+                data: list
+            })
+        } else {
+            res.send({
+                success: false,
+                message: "Internal Server Error"
+            })
+        }
+    })
+
     // Search products by term
     router.get('/', (req, res) => {
         const { search_term, size } = req.query
+
+        // 
 
         res.send({
             success: true,
@@ -91,7 +143,99 @@ export default () => {
     //     }
     // })
 
+    router.get('/test', async (req, res) => {
+        const result = await productsCollection.aggregate([
+            {
+                $match: {
+                    price: { $gt: 1 }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    price: 1,
+                    category: 1
+                }
+            },
+            {
+                $group: {
+                    _id: "$price",
+                    sum_quantity: { $sum: "$price" },
+                    products: { $push: '$$CURRENT' },
+                }
+            },
+            // {
+            //     $unwind: "$products" //Deconstruct by the field products
+            // }
+        ])
 
+        res.send({data: result, count: result.length})
+    })
+
+    // {
+    //     $project: {
+    //         name: 1,
+    //             'orders._id': 1,
+    //                 'orders.products': 1
+    //     }
+    // }
+    //Get products that have been ordered in the past month
+    router.get('/by_date/:month', async (req, res) => {
+        const { month } = req.params
+        try {
+            const products = await productsCollection.aggregate([
+                {
+                    $lookup: {
+                        from: 'orders',
+                        localField: '_id',
+                        foreignField: 'products.product_id',
+                        as: 'orders'
+                    }
+                },
+                // {
+                //     $project: {
+                //         name: 1,
+                //             'orders._id': 1,
+                //                 'orders.products': 1
+                //     }
+                // },
+                {
+                    $unwind: '$orders'
+                },
+                {
+                    $unwind: '$orders.products'
+                },
+                {
+                    $match: {
+                        $expr: { $eq: ["$_id", "$orders.products.product_id"] },
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        'orders.createdAt': 1,
+                        'orders.products': 1
+                    }
+                },
+                {
+                    $match: {
+                        'orders.createdAt': { $gt: moment().subtract(month, 'month').toDate() }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        sum_quantity: { $sum: "$orders.products.quantity" },
+                        grouped_orders: { $push: "$orders" }
+                    }
+                },
+            ])
+            res.send(products)
+        } catch (e) {
+            res.send(e)
+        }
+    })
 
 
     return router
