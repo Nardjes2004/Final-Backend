@@ -1,6 +1,7 @@
 import { Router } from 'express'
-import { usersCollection } from '../models/index.js'
+import { ordersCollections, usersCollection } from '../models/index.js'
 import mongoose from 'mongoose';
+import { NoOrdersException, NoUserFound } from '../utilities/errors.js';
 const ObjectId = mongoose.Types.ObjectId;
 
 export default () => {
@@ -27,6 +28,43 @@ export default () => {
         }
     })
 
+    router.post("/add_by_fullname", async (req, res) => {
+        try {
+            const { username, email, age, fullName, address } = req.body;
+
+            // Create a new user and set `fullName` using the virtual setter
+            const newUser = await usersCollection.create({ username, email, age, address });
+            newUser.fullName = fullName; // This sets both `firstName` and `lastName`
+
+            await newUser.save();
+            res.status(201).json(newUser);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+
+       
+    // GET /users/:id
+    router.get("/:id", async (req, res) => {
+        try {
+            const user = await usersCollection.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            console.log(user.totalStorageUser) // 5800 + 6600
+            // Use the virtual getter to get `fullName`
+            const userData = {
+                ...user,
+                fullName: user.fullName, // This uses the virtual getter,
+                totalStorageUser: user.totalStorageUser,
+                profileUrl: user.profileUrl // '/users/${user.username}
+            };
+
+            res.json(userData);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
 
     //Update a user
     router.put('/:id', async (req, res) => {
@@ -51,6 +89,25 @@ export default () => {
             res.send({ success: true, user: newUpdate })
         } else {
             res.send({ success: false, message: 'Server Error' })
+        }
+    })
+
+    router.get('/:id/orders', async (req, res) => {
+        try {
+            const { id } = req.params
+            const user = await usersCollection.findById(id)
+            if(!user) throw NoUserFound
+            const orders = await ordersCollections.find({ user: id }).populate("products.product_id")
+
+            if (orders.length > 0) {
+                res.send({ success: true, response: orders });
+                res.send()
+            } else {
+                // res.send({ success: false, message: "No orders found for this user" });
+                throw NoOrdersException
+            }
+        } catch (e) {
+            res.status(500).json({ message: e.message })
         }
     })
 
