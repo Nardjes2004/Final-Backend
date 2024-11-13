@@ -33,27 +33,10 @@ export default () => {
     });
 
 
-    // Login user
-    router.post('/login', async (req, res) => {
-        const { email, password } = req.body;
-
-        try {
-            // Check if user exists
-            const user = await usersCollection.findOne({ email });
-            if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
-
-            // Compare passwords
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
-
-            // Generate JWT token
-            const token = jwt.sign({ userId: user._id }, CONFIG.jwt_secret, { expiresIn: '1h' });
-
-            res.json({ token });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
+    // Login Route
+    router.post('/login', (req, res) => {
+        
+    })
 
     return router
 }
