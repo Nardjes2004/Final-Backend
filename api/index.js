@@ -3,6 +3,7 @@ import users from "./users.js";
 import products from "./products.js";
 import test from "./test.js";
 import orders from "./orders.js";
+import auth from "./auth.js";
 
 export default () => {
     let api = Router();
@@ -12,6 +13,8 @@ export default () => {
     api.use('/products', products())
 
     api.use('/orders', orders())
+
+    api.use('/auth', auth())
 
     api.use('/test', test())
 

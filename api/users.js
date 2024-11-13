@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { ordersCollections, usersCollection } from '../models/index.js'
 import mongoose from 'mongoose';
 import { NoOrdersException, NoUserFound } from '../utilities/errors.js';
+import authMiddleware from '../middlewares/auth.js';
 const ObjectId = mongoose.Types.ObjectId;
 
 export default () => {
@@ -12,7 +13,7 @@ export default () => {
     // /api/users
 
     //  /api/users
-    router.post('/', async (req, res) => {
+    router.post('/', authMiddleware,async (req, res) => {
         const body = req.body
         console.log(body)
         // !body.username || !body.age || !body.email

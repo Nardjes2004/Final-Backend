@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ordersCollections, productsCollection } from "../models/index.js";
 import moment from "moment";
+import authMiddleware from "../middlewares/auth.js";
 
 export default () => {
 
@@ -67,7 +68,7 @@ export default () => {
         })
     })
 
-    router.post('/', async (req, res) => {
+    router.post('/',authMiddleware, async (req, res) => {
         const { name, category, price, stock } = req.body
         // !name || !category || !price || !stock
         if (name && category && price && stock) {
