@@ -1,0 +1,169 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "E-Commerce",
+    "version": "1.0.0",
+    "description": "API documentation for the E-Commerce Website UpTown"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "User Operations",
+      "description": "Operations related to user management"
+    },
+    {
+      "name": "Product Operations",
+      "description": "Operations related to Products"
+    },
+    {
+      "name": "Order Operations",
+      "description": "Operations related to Orders"
+    },
+    {
+      "name": "Authentication",
+      "description": "Login & Register"
+    }
+  ],
+  "paths": {
+    "/api/products/filter_by_price/{price}": {
+      "get": {
+        "tags": ["Product Operations"],
+        "summary": "Get all products that have price greater than or equal the price parameter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "price",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Price"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result returned successfully"
+          },
+          "405": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/user/late_age/{age}": {
+      "post": {
+        "tags": ["User Operations"],
+        "summary": "Get users older than 25",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "price",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Age to filter users (default is 25)"
+          },
+          {
+            "in": "query",
+            "name": "otherParameter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An example of another query parameter"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "age": {
+                    "type": "integer"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response if you send a good request"
+          },
+          "400": {
+            "description": "user undefined"
+          }
+        }
+      }
+    },
+    "/api/product/prod": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "price",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "price seuil"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Price negative"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/orders/{orderId}":{
+      "delete": {
+        "tags": ["Order Operations"],
+        "summary": "Delete an order by orderId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result returned successfully"
+          },
+          "404": {
+            "description": "Order not found"
+          },
+          "500":{
+            "description": "Error server"
+          }
+        }
+      }
+    }
+  }
+}

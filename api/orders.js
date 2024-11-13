@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ordersCollections } from "../models/index.js";
+import { ordersCollections, productsCollection } from "../models/index.js";
 
 export default () => {
 
@@ -117,7 +117,7 @@ export default () => {
         const { orderId } = req.params;
 
         try {
-            const order = await ordersCollection.findById(orderId);
+            const order = await ordersCollections.findById(orderId);
             if (!order) {
                 return res.status(404).send('Order not found');
             }
@@ -129,12 +129,12 @@ export default () => {
                 }
             }
 
-            const deletedOrder = await ordersCollection.findByIdAndDelete(orderId)
+            const deletedOrder = await ordersCollections.findByIdAndDelete(orderId)
 
             if (deletedOrder) {
                 for (let item of order.products) {
                     const inc = await productsCollection.findByIdAndUpdate({ _id: item.product_id }, { $inc: { stock: item.quantity } }, { returnDocument: 'after' });
-                    res.send('Success of deleting order');
+                    res.status(200).send('Success of deleting order');
                 }
             }
 

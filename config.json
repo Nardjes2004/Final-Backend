@@ -1,6 +1,6 @@
 {
   "mongo_url": "mongodb://localhost:27017/mydb",
   "port": 8000,
+  "corsOrigin": ["http://localhost:3000", "http://localhost:4000"],
   "jwt_secret": "85ac0362c24c022e84f8705a44c278522dc2e053d1e056b3beb244436ed228d475ea7268752eca3bf830325f9c0077723fcfe06c150930bbbbf77f4b3983d0df"
 }
-
