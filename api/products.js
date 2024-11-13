@@ -68,7 +68,7 @@ export default () => {
         })
     })
 
-    router.post('/',authMiddleware, async (req, res) => {
+    router.post('/', authMiddleware, async (req, res) => {
         const { name, category, price, stock } = req.body
         // !name || !category || !price || !stock
         if (name && category && price && stock) {
@@ -170,7 +170,7 @@ export default () => {
             // }
         ])
 
-        res.send({data: result, count: result.length})
+        res.send({ data: result, count: result.length })
     })
 
     // {

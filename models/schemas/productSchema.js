@@ -8,14 +8,15 @@ const productSchema = new Schema({
     price: { type: Number, required: true },
     tags: [String],
     stock: { type: Number, required: true },
-    discount: {type: Number, default: 0}
+    discount: { type: Number, default: 0 }
 });
 
 
 // Virtual to calculate the discounted price
-productSchema.virtual('discountedPrice').get(function () {
-  return this.price * ((100 - this.discount) / 100);
-});
+productSchema.virtual('discountedPrice')
+    .get(function () {
+        return this.price * ((100 - this.discount) / 100);
+    });
 
 
 // Usage

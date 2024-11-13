@@ -13,7 +13,7 @@ export default () => {
         try {
             // Check if user already exists
             let user = await usersCollection.findOne({ email });
-            if (user) return res.status(400).json({ msg: 'User already exists' });
+            if (user) return res.status(400).json({ msg: 'User already exists with this email' });
 
             // Hash the password
             const salt = await bcrypt.genSalt(10);
@@ -33,10 +33,27 @@ export default () => {
     });
 
 
-    // Login Route
-    router.post('/login', (req, res) => {
-        
-    })
+    // Login user
+    router.post('/login', async (req, res) => {
+        const { email, password } = req.body;
+
+        try {
+            // Check if user exists
+            const user = await usersCollection.findOne({ email });
+            if (!user) return res.status(400).json({ msg: 'Invalid Email' });
+
+            // Compare passwords
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) return res.status(400).json({ msg: 'Invalid Password' });
+
+            // Generate JWT token
+            const token = jwt.sign({ userId: user._id }, CONFIG.jwt_secret, { expiresIn: '24h' });
+
+            res.json({ token });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
     return router
 }

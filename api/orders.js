@@ -112,6 +112,58 @@ export default () => {
             res.status(500).send('Error updating order');
         }
     });
+
+    router.delete('/:orderId', async (req, res) => {
+        const { orderId } = req.params;
+
+        try {
+            const order = await ordersCollection.findById(orderId);
+            if (!order) {
+                return res.status(404).send('Order not found');
+            }
+
+            for (let item of order.products) {
+                const product = await productsCollection.findById(item.product_id);
+                if (!product) {
+                    return res.status(400).send(`Product with ID ${item.product_id} not found`);
+                }
+            }
+
+            const deletedOrder = await ordersCollection.findByIdAndDelete(orderId)
+
+            if (deletedOrder) {
+                for (let item of order.products) {
+                    const inc = await productsCollection.findByIdAndUpdate({ _id: item.product_id }, { $inc: { stock: item.quantity } }, { returnDocument: 'after' });
+                    res.send('Success of deleting order');
+                }
+            }
+
+            if (deletedOrder) {
+                res.send({ success: true, message: 'Order deleted successfully' });
+            } else {
+                res.status(500).send('Error deleting order');
+            }
+        } catch (error) {
+            res.status(500).send('Error deleting order');
+        }
+    });
+
+    router.get('/by_status', async (req, res) => {
+        const stat = (req.query.status || '').split(',')
+        const result = await ordersCollections.find({ status: { $in: stat } })
+        if (result) {
+            res.send({
+                success: true,
+                response: result
+            })
+        } else {
+            res.send({
+                success: true,
+                message: 'try again'
+            })
+        }
+
+    })
     
     return router
 }

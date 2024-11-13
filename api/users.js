@@ -112,6 +112,31 @@ export default () => {
         }
     })
 
+    //10. Delete an Order and Rollback Product Stock
+    router.get("/:id/revenue", async (req, res) => {
+        const { id } = req.params;
+
+        const result = await ordersCollections.aggregate([
+            {
+                $match: {
+                    user: new ObjectId(id)
+                },
+            },
+            {
+                $group: {
+                    _id: "$user",
+                    totalRevenue: { $sum: "$total_price" },
+                },
+            },
+        ]);
+
+        if (result) {
+            res.send({ success: true, response: result });
+        } else {
+            res.send({ success: false, message: "No Total Revenue" });
+        }
+    }); //const ObjectId = mongoose.Types.ObjectId;
+
 
     return router
 

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String },
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    age: { type: Number},
+    age: { type: Number },
     address: {
         street: String,
         city: String,
@@ -31,9 +31,10 @@ userSchema.virtual('fullName').
 
 
 // Virtual to calculate total storage used
-userSchema.virtual('totalStorageUsed').get(function () {
-    return this.files.reduce((total, file) => total + file.size, 0);
-});
+userSchema.virtual('totalStorageUsed')
+    .get(function () {
+        return this.files.reduce((total, file) => total + file.size, 0);
+    });
 
 // Usage
 // const user = new User({ files: [{ size: 5 }, { size: 10 }, { size: 15 }] });

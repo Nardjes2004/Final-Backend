@@ -15,7 +15,7 @@ const orderSchema = new Schema({
         },
     ],
     total_price: { type: Number, required: true },
-    status: { type: String, required: true }, //shipped, processing, delivered
+    status: { type: String, required: true, default: "ordered" }, //shipped, processing, delivered
 });
 
 export default orderSchema;
