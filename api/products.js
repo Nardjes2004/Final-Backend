@@ -7,7 +7,85 @@ export default () => {
 
     let router = Router()
 
+    router.get("/get_all_products", async (req, res) => {
+        try {
+            const result = await productsCollection.find({});
+            res.send({ success: true, response: result });
+        } catch (err) {
+            res.send({ success: false, message: "Error fetching products", error: err });
+        }
+    });
 
+
+    router.get("/get_product/:id", async (req, res) => {
+        try {
+            const productId = req.params.id; // Convert id to a number
+            // const productId = parseInt(req.params.id, 10); // Convert id to a number
+    
+            if (isNaN(productId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid product ID",
+                });
+            }
+    
+            // Find product by ID
+            const product = await productsCollection.findOne({ id: productId });
+    
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found",
+                });
+            }
+    
+            res.status(200).json({
+                success: true,
+                response: product,
+            });
+        } catch (err) {
+            console.error("Error fetching product by ID:", err);
+            res.status(500).json({
+                success: false,
+                message: "Error fetching product",
+                error: err,
+            });
+        }
+    });
+    
+
+//     // Endpoint to fetch product by ID
+// router.get('/get_product/:id', async(req, res) => {
+//     const productId = parseInt(req.params.id, 10); // Convert id to a number
+//     const product = productsCollection.find((item) => item.id === productId);
+
+//     if (!product) {
+//         return res.status(404).json({
+//             success: false,
+//             message: "Product not found"
+//         });
+//     }
+
+//     return res.status(200).json({
+//         success: true,
+//         response: product
+//     });
+// });
+
+    // router.post('/get_products_by_ids', async (req, res) => {
+    //     const { ids } = req.body; // Expecting an array of IDs in the request body
+    //     try {
+    //       if (!ids || !Array.isArray(ids)) {
+    //         return res.status(400).send({ success: false, message: "Invalid IDs format" });
+    //       }
+      
+    //       const products = await productsCollection.find({ id: { $in: ids } });
+    //       res.send({ success: true, response: products });
+    //     } catch (error) {
+    //       console.error('Error fetching products by IDs:', error);
+    //       res.status(500).send({ success: false, message: "Server error", error });
+    //     }
+    //   });
     router.post("/filter-dynamically", async (req, res) => {
         const options = {}
         let projection = null
